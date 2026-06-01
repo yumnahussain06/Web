@@ -14,3 +14,5 @@ predictions_collection = db["predictions"]
 metrics_collection = db["metrics"]
 
 users_collection = db["users"]
+
+user_activity_collection = db["user_activity"]

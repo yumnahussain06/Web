@@ -21,9 +21,27 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+# def verify_token(token: str):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         return payload.get("sub")
+#     except JWTError:
+#         return None
+
 def verify_token(token: str):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("TOKEN RECEIVED:", token)
+
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        print("PAYLOAD:", payload)
+
         return payload.get("sub")
-    except JWTError:
+
+    except JWTError as e:
+        print("JWT ERROR:", e)
         return None

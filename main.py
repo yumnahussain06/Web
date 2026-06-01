@@ -8,15 +8,18 @@ import joblib
 import json
 from mongodb import metrics_collection
 from mongodb import predictions_collection
+from mongodb import users_collection
+from mongodb import user_activity_collection
 
 from security import (hash_password, verify_password)
 from auth import create_access_token
-from mongodb import users_collection
 
 from fastapi import Depends, HTTPException, Header
 from auth import verify_token
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+from datetime import datetime, timezone
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -97,8 +100,10 @@ def predict(data: LoanInput, current_user: str = Depends(get_current_user)):
     status = "Approved" if result in [1, 'Y'] else "Rejected"
 
     predictions_collection.insert_one({
+        "username": current_user,
         "input_data": data.model_dump(),
-        "prediction": str(result)
+        "prediction": status,
+        "timestamp": datetime.now(timezone.utc)
     })
 
     return {
@@ -171,6 +176,17 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
     token = create_access_token({"sub": form_data.username})
 
+    users_collection.update_one(
+        {"username": form_data.username},
+        {"$set": {"last_login": datetime.utcnow()}}
+    )
+
+    user_activity_collection.insert_one({
+        "username": form_data.username,
+        "action": "login",
+        "timestamp": datetime.utcnow()
+    })
+    
     return {
         "access_token": token,
         "token_type": "bearer"
