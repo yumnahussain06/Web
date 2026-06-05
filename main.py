@@ -37,9 +37,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 # LOAD MODEL + PIPELINE
 model = joblib.load("Ml/best_loan_risk_model.pkl")
 
-preprocessing_pipeline = joblib.load(
-    "Ml/preprocessor_pipeline.pkl"
-)
+# preprocessing_pipeline = joblib.load(
+#     "Ml/preprocessor_pipeline.pkl"
+# )
 
 
 # FASTAPI APP
